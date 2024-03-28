@@ -1,0 +1,328 @@
+openapi: 3.0.0
+info:
+  title: MoviePlay API
+  description: API para visualizar y recomendar películas
+  version: 1.0.0
+servers:
+  - url: http://api.movieplay.com
+paths:
+  /api/auth/googleSignIn:
+    post:
+      summary: Iniciar sesión mediante Google Sign In
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GoogleSignInRequest'
+      responses:
+        '200':
+          description: OK
+      tags:
+        - Authentication
+  /api/auth/logout:
+    post:
+      summary: Cerrar sesión del usuario
+      responses:
+        '200':
+          description: OK
+      tags:
+        - Authentication
+  /api/users/{userId}:
+    get:
+      summary: Obtener datos de usuario
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          description: ID del usuario
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+    put:
+      summary: Editar datos de usuario
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          description: ID del usuario
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserUpdateRequest'
+      responses:
+        '200':
+          description: OK
+      tags:
+        - Users
+  /api/users/{userId}/favorites:
+    get:
+      summary: Obtener películas favoritas del usuario
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          description: ID del usuario
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Movie'
+    post:
+      summary: Agregar película a favoritos
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          description: ID del usuario
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                movieId:
+                  type: string
+                  description: ID de la película a agregar a favoritos
+      responses:
+        '200':
+          description: OK
+      tags:
+        - Users
+  /api/movies:
+    get:
+      summary: Obtener películas más nuevas
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Movie'
+  /api/movies/{movieId}:
+    get:
+      summary: Obtener detalles de una película
+      parameters:
+        - in: path
+          name: movieId
+          required: true
+          description: ID de la película
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Movie'
+  /api/movies/genres/{genreId}:
+    get:
+      summary: Filtrar películas por género
+      parameters:
+        - in: path
+          name: genreId
+          required: true
+          description: ID del género
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Movie'
+  /api/movies/search:
+    get:
+      summary: Buscar películas por título o nombre de actor
+      parameters:
+        - in: query
+          name: query
+          required: true
+          description: Término de búsqueda
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Movie'
+    parameters:
+      - in: query
+        name: sortBy
+        description: Campo por el cual ordenar los resultados (date, rating)
+        schema:
+          type: string
+  /api/movies/{movieId}/rating:
+    post:
+      summary: Calificar una película
+      parameters:
+        - in: path
+          name: movieId
+          required: true
+          description: ID de la película
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                rating:
+                  type: number
+                  description: Calificación de la película (0-5)
+      responses:
+        '200':
+          description: OK
+  /api/movies/{movieId}/share:
+    post:
+      summary: Compartir una película
+      parameters:
+        - in: path
+          name: movieId
+          required: true
+          description: ID de la película
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+  /api/movies/{movieId}/favorite:
+    post:
+      summary: Marcar película como favorita
+      parameters:
+        - in: path
+          name: movieId
+          required: true
+          description: ID de la película
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+    delete:
+      summary: Eliminar película de favoritos
+      parameters:
+        - in: path
+          name: movieId
+          required: true
+          description: ID de la película
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+components:
+  schemas:
+    GoogleSignInRequest:
+      type: object
+      properties:
+        token:
+          type: string
+          description: Token de autenticación de Google
+    User:
+      type: object
+      properties:
+        userId:
+          type: string
+          description: ID del usuario
+        firstName:
+          type: string
+          description: Nombre del usuario
+        lastName:
+          type: string
+          description: Apellido del usuario
+        nickname:
+          type: string
+          description: Nombre de fantasía del usuario
+        email:
+          type: string
+          format: email
+          description: Dirección de correo electrónico del usuario
+        profileImage:
+          type: string
+          description: URL de la imagen de perfil del usuario
+    UserUpdateRequest:
+      type: object
+      properties:
+        firstName:
+          type: string
+          description: Nuevo nombre del usuario
+        lastName:
+          type: string
+          description: Nuevo apellido del usuario
+        nickname:
+          type: string
+          description: Nuevo nombre de fantasía del usuario
+        email:
+          type: string
+          format: email
+          description: Nueva dirección de correo electrónico del usuario
+        profileImage:
+          type: string
+          description: Nueva URL de la imagen de perfil del usuario
+    Movie:
+      type: object
+      properties:
+        movieId:
+          type: string
+          description: ID de la película
+        title:
+          type: string
+          description: Título de la película
+        subtitle:
+          type: string
+          description: Subtítulo de la película
+        synopsis:
+          type: string
+          description: Sinopsis de la película
+        genre:
+          type: string
+          description: Género de la película
+        releaseYear:
+          type: integer
+          description: Año de lanzamiento de la película
+        duration:
+          type: integer
+          description: Duración de la película en minutos
+        rating:
+          type: number
+          description: Calificación de la película (0-5)
+        director:
+          type: string
+          description: Nombre del director de la película
+        cast:
+          type: array
+          items:
+            type: string
+          description: Reparto de la película
